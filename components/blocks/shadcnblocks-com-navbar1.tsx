@@ -85,7 +85,7 @@ const Navbar = ({
 }: Navbar1Props) => {
   return (
     <section className="">
-      <div className="container mx-auto">
+      <div className="">
         <nav className="hidden justify-between lg:flex">
           <div className="flex items-center gap-6">
             <a href={logo.url} className="flex items-center gap-2">

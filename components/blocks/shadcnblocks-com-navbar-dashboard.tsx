@@ -1,9 +1,11 @@
+'use client'
+
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@radix-ui/react-accordion";
 import { NavigationMenu, NavigationMenuList } from "@radix-ui/react-navigation-menu";
-import { JSX } from "react";
+import { JSX, useState } from "react";
 import { Button } from "../ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "../ui/sheet";
-import { User, Menu } from "lucide-react";
+import { User, Menu, ShoppingCart } from "lucide-react";
 
 interface MenuItem {
   title: string;
@@ -45,7 +47,7 @@ export const NavbarDashboard = ({
     title: "prism",
   },
   menu = [
-    { title: "Home", url: "/dashboard/home" },
+    { title: "Home", url: "/dashboard" },
     { title: "Products", url: "/dashboard/products" },
     { title: "My Orders", url: "/dashboard/orders" },
   ],
@@ -60,9 +62,15 @@ export const NavbarDashboard = ({
     signup: { text: "Profile", url: "/dashboard/profile" },
   },
 }: NavbarDashboardProps) => {
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+
+  const toggleDropdown = () => {
+    setDropdownOpen(!dropdownOpen);
+  };
+
   return (
     <section className="">
-      <div className="container mx-auto">
+      <div className="">
         <nav className="hidden justify-between lg:flex">
           <div className="flex items-center gap-6">
             <a href={logo.url} className="flex items-center gap-2">
@@ -77,14 +85,19 @@ export const NavbarDashboard = ({
               </NavigationMenu>
             </div>
           </div>
-          <div className="flex items-center gap-4">
-            <User className="w-6 h-6" />
-            <Button asChild variant="outline" size="sm">
-              <a href={auth.login.url}>{auth.login.text}</a>
-            </Button>
-            <Button asChild size="sm">
-              <a href={auth.signup.url}>{auth.signup.text}</a>
-            </Button>
+          <div className="flex items-center gap-6">
+          <ShoppingCart />
+
+            <div className="relative">
+              <User className="w-6 h-6 cursor-pointer" onClick={toggleDropdown} />
+              {dropdownOpen && (
+                <div className="absolute right-0 mt-2 w-48 bg-white border rounded shadow-lg">
+                  <a href={auth.login.url} className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                    Logout
+                  </a>
+                </div>
+              )}
+            </div>
           </div>
         </nav>
         <div className="block lg:hidden">
