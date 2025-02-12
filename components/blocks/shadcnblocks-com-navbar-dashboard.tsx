@@ -1,3 +1,5 @@
+"use client"
+
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@radix-ui/react-accordion";
 import { NavigationMenu, NavigationMenuList } from "@radix-ui/react-navigation-menu";
 import { JSX, useState } from "react";
@@ -8,6 +10,7 @@ import { ShoppingCartSheet } from "@/app/dashboard/cart/page";
 import { signOut } from "firebase/auth";
 import { useRouter } from "next/navigation";
 import { auth } from "../../lib/firebaseClient"; // Import the Firebase auth object
+import Image from 'next/image'
 
 interface MenuItem {
   title: string;
@@ -75,7 +78,13 @@ export const NavbarDashboard = ({
         <nav className="hidden justify-between lg:flex">
           <div className="flex items-center gap-6">
             <a href={logo.url} className="flex items-center gap-2">
-              <img src={logo.src} className="w-8" alt={logo.alt} />
+              <Image
+                src={logo.src}
+                alt={logo.alt}
+                width={32}
+                height={32}
+                className="w-8"
+              />
               <span className="text-lg font-semibold">{logo.title}</span>
             </a>
             <div className="flex items-center">
@@ -110,7 +119,13 @@ export const NavbarDashboard = ({
         <div className="block lg:hidden">
           <div className="flex items-center justify-between">
             <a href={logo.url} className="flex items-center gap-2">
-              <img src={logo.src} className="w-8" alt={logo.alt} />
+              <Image
+                src={logo.src}
+                alt={logo.alt}
+                width={32}
+                height={32}
+                className="w-8"
+              />
               <span className="text-lg font-semibold">{logo.title}</span>
             </a>
             <div>
@@ -127,7 +142,13 @@ export const NavbarDashboard = ({
                 <SheetHeader>
                   <SheetTitle>
                     <a href={logo.url} className="flex items-center gap-2">
-                      <img src={logo.src} className="w-8" alt={logo.alt} />
+                      <Image
+                        src={logo.src}
+                        alt={logo.alt}
+                        width={32}
+                        height={32}
+                        className="w-8"
+                      />
                       <span className="text-lg font-semibold">
                         {logo.title}
                       </span>

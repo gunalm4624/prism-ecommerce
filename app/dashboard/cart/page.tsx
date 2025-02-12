@@ -1,3 +1,5 @@
+"use client"
+
 import { useState, useEffect } from 'react'
 import { Button } from "@/components/ui/button"
 import {
@@ -24,6 +26,7 @@ import {
 } from 'firebase/firestore'
 import { db, auth } from '@/lib/firebaseClient'
 import { useToast } from '@/hooks/use-toast'
+import Image from 'next/image'
 
 interface CartItem {
   id: string
@@ -47,9 +50,11 @@ const CartItemComponent = ({
 }) => {
   return (
     <div className="flex items-center gap-4 py-4 border-b">
-      <img 
+      <Image 
         src={item.image} 
         alt={item.name} 
+        width={80}
+        height={80}
         className="h-20 w-20 rounded-lg object-cover"
       />
       <div className="flex-1">
@@ -217,4 +222,8 @@ export function ShoppingCartSheet() {
       </SheetContent>
     </Sheet>
   )
+}
+
+export default function CartPage() {
+  // ... component code
 }

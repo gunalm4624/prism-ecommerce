@@ -14,6 +14,11 @@ import { IconBrandGoogle } from "@tabler/icons-react";
 import { Input } from "./input";
 import { Label } from "./label";
 
+interface AuthError {
+  message: string;
+  code?: string;
+}
+
 export function SignInForm() {
   const router = useRouter();
   const { toast } = useToast();
@@ -40,7 +45,7 @@ export function SignInForm() {
       setTimeout(() => {
         router.push("/dashboard");
       }, 2000);
-    } catch (error: any) {
+    } catch (error: AuthError) {
       toast({
         variant: "destructive",
         title: "Login failed",
@@ -67,7 +72,7 @@ export function SignInForm() {
       setTimeout(() => {
         router.push("/dashboard");
       }, 2000);
-    } catch (error: any) {
+    } catch (error: AuthError) {
       toast({
         variant: "destructive",
         title: "Google Login failed",
@@ -99,7 +104,7 @@ export function SignInForm() {
         className: "bg-green-500 text-white",
       });
       setIsForgotPassword(false); // Close the forgot password form
-    } catch (error: any) {
+    } catch (error: AuthError) {
       toast({
         variant: "destructive",
         title: "Error",
