@@ -11,6 +11,8 @@ import { db, auth } from '@/lib/firebaseClient';
 import { useToast } from '@/hooks/use-toast';
 import Script from 'next/script';
 import { Product } from '@/types/product';
+import { createClient } from '@/lib/supabase/client';
+import { showPaymentSuccessToast } from '@/components/ui/payment-success-toast';
 
 interface ProductDetailProps {
   product: Product;
@@ -102,17 +104,15 @@ const ProductPage: React.FC<ProductDetailProps> = ({ product }) => {
         key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
         amount: data.amount,
         currency: 'INR',
-        name: 'K2 Designers',
+        name: 'Beutika Herbals',
         description: `Purchase of ${product.name}`,
         order_id: data.orderId,
         handler: async function (response: any) {
           try {
-            // Handle successful payment
+            // Verify payment with backend
             await fetch('http://localhost:4000/success', {
               method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-              },
+              headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({
                 orderCreationId: data.orderId,
                 razorpayPaymentId: response.razorpay_payment_id,
@@ -121,32 +121,38 @@ const ProductPage: React.FC<ProductDetailProps> = ({ product }) => {
               }),
             });
 
-            // Save order to Firestore
-            const orderRef = doc(collection(db, 'orders'));
-            await setDoc(orderRef, {
-              userId: user.uid,
-              productId: product.id,
-              productName: product.name,
+            const supabase = createClient();
+            
+            // Save order to Supabase
+            const { error } = await supabase.from('orders').insert({
+              user_id: user.uid,
+              product_id: product.id,
+              product_name: product.name,
+              product_image: product.image,
               quantity: quantity,
               amount: product.price * quantity,
-              paymentId: response.razorpay_payment_id,
-              orderId: response.razorpay_order_id,
+              payment_id: response.razorpay_payment_id,
+              order_id: response.razorpay_order_id,
               status: 'completed',
-              timestamp: new Date(),
-              shippingStatus: 'pending',
-              customerEmail: user.email,
-              customerName: user.displayName
+              tracking_status: 'processing',
+              tracking_number: `TRK${Math.random().toString(36).substr(2, 9)}`,
+              customer_email: user.email,
+              customer_name: user.displayName
             });
 
-            toast({
-              title: "Payment successful",
-              description: "Your order has been placed successfully",
+            if (error) throw error;
+
+            showPaymentSuccessToast({
+              orderId: response.razorpay_order_id,
+              amount: product.price * quantity,
+              productName: product.name,
             });
+
           } catch (error) {
-            console.error('Error processing payment:', error);
+            console.error('Payment verification failed:', error);
             toast({
-              title: "Error",
-              description: "Failed to process payment",
+              title: "Payment verification failed",
+              description: "Please contact support if amount was deducted",
               variant: "destructive",
             });
           }
