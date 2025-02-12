@@ -6,7 +6,7 @@ export default function Home() {
   return (
     <div className="max-w-xxl p-4">
       <Navbar/>
-      <div className="mt-24">
+      <div className="mt-6">
       <HomePage/>
       </div>
     </div>

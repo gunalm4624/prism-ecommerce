@@ -1,9 +1,14 @@
-import { Hero } from '@/components/ui/hero-section'
+import Image from 'next/image'
 import React from 'react'
-
+import './page.css'
+import { Button } from '@/components/ui/button'
 const HomePage = () => {
   return (
-        <Hero/>
+    <div>
+      <section id="Home"> 
+        
+      </section>
+    </div>
   )
 }
 

@@ -1,13 +1,13 @@
 "use client";
 import React, { useRef, useState } from "react";
-import { Label } from "./label";
 import { IconBrandGoogle } from "@tabler/icons-react";
 import { createUserWithEmailAndPassword, signInWithPopup, GoogleAuthProvider } from "firebase/auth";
 import { useRouter } from "next/navigation";
-import { Input } from "./input";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { auth } from "@/lib/firebaseClient";
+import { Input } from "./input";
+import { Label } from "./label";
 
 export function SignupForm() {
   const router = useRouter();
@@ -28,20 +28,16 @@ export function SignupForm() {
 
     try {
       const { user } = await createUserWithEmailAndPassword(auth, email, password);
-      // Additional user data can be saved in Firestore if needed
-
       toast({
         title: "Account created successfully!",
         description: "Please check your email for verification.",
         className: "bg-green-500 text-white",
       });
 
-      // Reset form using the ref
       if (formRef.current) {
         formRef.current.reset();
       }
 
-      // Redirect to dashboard after a short delay
       setTimeout(() => {
         router.push("/dashboard");
       }, 2000);
@@ -71,7 +67,6 @@ export function SignupForm() {
         className: "bg-green-500 text-white",
       });
 
-      // Redirect to dashboard after a short delay
       setTimeout(() => {
         router.push("/dashboard");
       }, 2000);
@@ -88,7 +83,7 @@ export function SignupForm() {
   };
 
   return (
-    <div className="card border mt-6 max-w-md w-full mx-auto rounded-none md:rounded-2xl p-4 md:p-8 shadow-input bg-white dark:bg-black">
+    <div className="card border mt-16 max-w-md w-full mx-auto rounded-none md:rounded-2xl p-4 md:p-8 shadow-input bg-white dark:bg-black">
       <h2 className="font-bold text-xl text-neutral-800 dark:text-neutral-200">
         Welcome to Prism Ecommerce
       </h2>
@@ -152,7 +147,7 @@ export function SignupForm() {
             <span className="text-neutral-700 dark:text-neutral-300 text-sm">
               Sign up with Google
             </span>
-            <BottomGradient />
+            <BottomGradient/>
           </button>
         </div>
       </form>

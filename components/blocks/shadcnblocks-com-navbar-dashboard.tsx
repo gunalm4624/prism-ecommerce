@@ -1,11 +1,13 @@
-'use client'
-
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@radix-ui/react-accordion";
 import { NavigationMenu, NavigationMenuList } from "@radix-ui/react-navigation-menu";
 import { JSX, useState } from "react";
 import { Button } from "../ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "../ui/sheet";
 import { User, Menu, ShoppingCart } from "lucide-react";
+import { ShoppingCartSheet } from "@/app/dashboard/cart/page";
+import { signOut } from "firebase/auth";
+import { useRouter } from "next/navigation";
+import { auth } from "../../lib/firebaseClient"; // Import the Firebase auth object
 
 interface MenuItem {
   title: string;
@@ -27,16 +29,7 @@ interface NavbarDashboardProps {
     name: string;
     url: string;
   }[];
-  auth?: {
-    login: {
-      text: string;
-      url: string;
-    };
-    signup: {
-      text: string;
-      url: string;
-    };
-  };
+
 }
 
 export const NavbarDashboard = ({
@@ -57,15 +50,23 @@ export const NavbarDashboard = ({
     { name: "Imprint", url: "#" },
     { name: "Sitemap", url: "#" },
   ],
-  auth = {
-    login: { text: "Log out", url: "/auth/logout" },
-    signup: { text: "Profile", url: "/dashboard/profile" },
-  },
+
 }: NavbarDashboardProps) => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const router = useRouter();
 
   const toggleDropdown = () => {
     setDropdownOpen(!dropdownOpen);
+  };
+
+  const handleLogout = async () => {
+    try {
+      await signOut(auth); // Use the Firebase auth object here
+      setDropdownOpen(false); // Close dropdown on logout
+      router.push("/auth/signin"); // Redirect to login
+    } catch (error) {
+      console.error("Error signing out:", error);
+    }
   };
 
   return (
@@ -86,28 +87,38 @@ export const NavbarDashboard = ({
             </div>
           </div>
           <div className="flex items-center gap-6">
-          <ShoppingCart />
-
+            <ShoppingCartSheet />
             <div className="relative">
-              <User className="w-6 h-6 cursor-pointer" onClick={toggleDropdown} />
+              <Button variant="outline" size="icon" className="relative">
+                <User className="w-6 h-6 cursor-pointer" onClick={toggleDropdown} />
+              </Button>
               {dropdownOpen && (
                 <div className="absolute right-0 mt-2 w-48 bg-white border rounded shadow-lg">
-                  <a href={auth.login.url} className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                  <button
+                    onClick={handleLogout}
+                    className="block w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100"
+                  >
                     Logout
-                  </a>
+                  </button>
                 </div>
               )}
             </div>
           </div>
         </nav>
+
+        {/* Mobile Navbar */}
         <div className="block lg:hidden">
           <div className="flex items-center justify-between">
             <a href={logo.url} className="flex items-center gap-2">
               <img src={logo.src} className="w-8" alt={logo.alt} />
               <span className="text-lg font-semibold">{logo.title}</span>
             </a>
+            <div>
+            <ShoppingCartSheet/>
+
             <Sheet>
               <SheetTrigger asChild>
+
                 <Button variant="outline" size="icon">
                   <Menu className="size-4" />
                 </Button>
@@ -145,16 +156,15 @@ export const NavbarDashboard = ({
                     </div>
                   </div>
                   <div className="flex flex-col gap-3">
-                    <Button asChild variant="outline">
-                      <a href={auth.login.url}>{auth.login.text}</a>
+                    <Button onClick={handleLogout} variant="outline">
+                      Logout
                     </Button>
-                    <Button asChild>
-                      <a href={auth.signup.url}>{auth.signup.text}</a>
-                    </Button>
+               
                   </div>
                 </div>
               </SheetContent>
             </Sheet>
+            </div>
           </div>
         </div>
       </div>

@@ -59,14 +59,14 @@ interface Navbar1Props {
 const Navbar = ({
   logo = {
     url: "https://prismdesign.in",
-    src: "/images/prism-logo.svg",
+    src: "/images/Brand-Logo.png",
     alt: "logo",
-    title: "prism",
+    title: "",
   },
   menu = [
-    { title: "Home", url: "#" },
+    { title: "Home", url: "/" },
     {
-      title: "Products", url: "#"},
+      title: "Products", url: ""},
     {
       title: "About Us",url: "#"},
     {
@@ -101,11 +101,11 @@ const Navbar = ({
             </div>
           </div>
           <div className="flex gap-2">
-            <Button asChild variant="outline" size="sm">
-              <a href={auth.login.url}>{auth.login.text}</a>
+            <Button asChild variant="outline" size="sm" className="">
+              <a href={auth.login.url} className="bg-green boreder-green">{auth.login.text}</a>
             </Button>
             <Button asChild size="sm">
-              <a href={auth.signup.url}>{auth.signup.text}</a>
+              <a href={auth.signup.url} className="background-green">{auth.signup.text}</a>
             </Button>
           </div>
         </nav>
@@ -145,7 +145,7 @@ const Navbar = ({
                       {mobileExtraLinks.map((link, idx) => (
                         <a
                           key={idx}
-                          className="inline-flex h-10 items-center gap-2 whitespace-nowrap rounded-md px-4 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-accent-foreground"
+                          className="inline-flex h-10 items-center gap-2 whitespace-nowrap rounded-md px-4 py-2 text-sm font-medium transition-colors hover:bg-muted hover:text-accent-foreground"
                           href={link.url}
                         >
                           {link.name}
@@ -174,7 +174,7 @@ const Navbar = ({
 const renderMenuItem = (item: MenuItem) => {
   if (item.items) {
     return (
-      <NavigationMenuItem key={item.title} className="text-muted-foreground">
+      <NavigationMenuItem key={item.title} className="">
         <NavigationMenuTrigger>{item.title}</NavigationMenuTrigger>
         <NavigationMenuContent>
           <ul className="w-80 p-3">
@@ -191,7 +191,7 @@ const renderMenuItem = (item: MenuItem) => {
                         {subItem.title}
                       </div>
                       {subItem.description && (
-                        <p className="text-sm leading-snug text-muted-foreground">
+                        <p className="text-sm leading-snug">
                           {subItem.description}
                         </p>
                       )}
@@ -209,7 +209,7 @@ const renderMenuItem = (item: MenuItem) => {
   return (
     <a
       key={item.title}
-      className="group inline-flex h-10 w-max items-center justify-center rounded-md bg-background px-4 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-accent-foreground"
+      className="group inline-flex h-10 w-max items-center justify-center rounded-md bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-muted hover:text-accent-foreground"
       href={item.url}
     >
       {item.title}

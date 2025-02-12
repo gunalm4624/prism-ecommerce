@@ -3,6 +3,7 @@ import { ProductCard } from './productCard'
 import { products } from '@/data/products'
 import { Product } from '@/types/product'
 import { NavbarDashboard } from '@/components/blocks/shadcnblocks-com-navbar-dashboard'
+import { StackedCircularFooter } from '@/components/ui/stacked-circular-footer'
 
 const Products = () => {
   return (
@@ -15,6 +16,7 @@ const Products = () => {
             <ProductCard key={product.id} product={product} />
           ))}
         </div>
+        <StackedCircularFooter/>
         </div>
   )
 }
