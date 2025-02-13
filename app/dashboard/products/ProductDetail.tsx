@@ -13,6 +13,7 @@ import Script from 'next/script';
 import { Product } from '@/types/product';
 import { createClient } from '@/lib/supabase/client';
 import { showPaymentSuccessToast } from '@/components/ui/payment-success-toast';
+import { useRouter } from 'next/navigation';
 
 interface ProductDetailProps {
   product: Product;
@@ -29,6 +30,7 @@ const ProductPage: React.FC<ProductDetailProps> = ({ product }) => {
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
   const user = auth.currentUser;
+  const router = useRouter();
 
   const increaseQuantity = () => setQuantity((prev) => prev + 1);
   const decreaseQuantity = () => setQuantity((prev) => (prev > 1 ? prev - 1 : 1));
@@ -69,117 +71,21 @@ const ProductPage: React.FC<ProductDetailProps> = ({ product }) => {
     }
   };
 
-  const handlePayment = async () => {
-    if (!user) {
-      toast({
-        title: "Please sign in",
-        description: "You need to be signed in to make a purchase",
-        variant: "destructive",
-      });
-      return;
-    }
-
+  const handlePayment = () => {
     setIsLoading(true);
-
     try {
-      // Create order on backend
-      const response = await fetch('http://localhost:4000/createOrder', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          amount: product.price * quantity * 100, // Convert to paise
-        }),
+      const params = new URLSearchParams({
+        image: product.image,
+        title: product.name,
+        description: product.description || '',
+        price: product.price.toString(),
+        product_id: product.id.toString()
       });
-
-      const data = await response.json();
-
-      if (!data.orderId) {
-        throw new Error('Failed to create order');
-      }
-
-      // Initialize Razorpay payment
-      const options = {
-        key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
-        amount: data.amount,
-        currency: 'INR',
-        name: 'Beutika Herbals',
-        description: `Purchase of ${product.name}`,
-        order_id: data.orderId,
-        handler: async function (response: any) {
-          try {
-            // Verify payment with backend
-            await fetch('http://localhost:4000/success', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                orderCreationId: data.orderId,
-                razorpayPaymentId: response.razorpay_payment_id,
-                razorpayOrderId: response.razorpay_order_id,
-                razorpaySignature: response.razorpay_signature,
-              }),
-            });
-
-            const supabase = createClient();
-            
-            // Save order to Supabase
-            const { error } = await supabase.from('orders').insert({
-              user_id: user.uid,
-              product_id: product.id,
-              product_name: product.name,
-              product_image: product.image,
-              quantity: quantity,
-              amount: product.price * quantity,
-              payment_id: response.razorpay_payment_id,
-              order_id: response.razorpay_order_id,
-              status: 'completed',
-              tracking_status: 'processing',
-              tracking_number: `TRK${Math.random().toString(36).substr(2, 9)}`,
-              customer_email: user.email,
-              customer_name: user.displayName
-            });
-
-            if (error) throw error;
-
-            showPaymentSuccessToast({
-              orderId: response.razorpay_order_id,
-              amount: product.price * quantity,
-              productName: product.name,
-            });
-
-          } catch (error) {
-            console.error('Payment verification failed:', error);
-            toast({
-              title: "Payment verification failed",
-              description: "Please contact support if amount was deducted",
-              variant: "destructive",
-            });
-          }
-        },
-        prefill: {
-          name: user.displayName || '',
-          email: user.email || '',
-        },
-        theme: {
-          color: "#3399cc",
-        },
-        modal: {
-          ondismiss: function() {
-            setIsLoading(false);
-          }
-        }
-      };
-
-      const paymentObject = new window.Razorpay(options);
-      paymentObject.open();
+      
+      router.push(`/customer-details?${params.toString()}`);
     } catch (error) {
-      console.error('Error:', error);
-      toast({
-        title: "Error",
-        description: "Failed to initialize payment",
-        variant: "destructive",
-      });
+      console.error('Navigation error:', error);
+    } finally {
       setIsLoading(false);
     }
   };
@@ -243,6 +149,7 @@ const ProductPage: React.FC<ProductDetailProps> = ({ product }) => {
                   <Button 
                     onClick={handlePayment} 
                     disabled={isLoading}
+                    className="w-full md:w-auto"
                   >
                     {isLoading ? 'Processing...' : 'Buy Now'}
                   </Button>

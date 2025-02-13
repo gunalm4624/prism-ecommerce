@@ -1,5 +1,5 @@
 import { initializeApp } from "firebase/app";
-import { getAuth } from "firebase/auth";
+import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 
 // Your web app's Firebase configuration
@@ -23,3 +23,37 @@ export const db = getFirestore(app);
 export type FirebaseApp = typeof app;
 export type FirebaseAuth = typeof auth;
 export type FirebaseDB = typeof db;
+
+// Function to store user session
+export const storeUserSession = (user: any) => {
+  if (user) {
+    sessionStorage.setItem('user', JSON.stringify({
+      uid: user.uid,
+      email: user.email,
+      displayName: user.displayName,
+      photoURL: user.photoURL
+    }));
+  }
+};
+
+// Function to clear user session
+export const clearUserSession = () => {
+  sessionStorage.removeItem('user');
+};
+
+// Function to get stored user session
+export const getUserSession = () => {
+  const userStr = sessionStorage.getItem('user');
+  return userStr ? JSON.parse(userStr) : null;
+};
+
+// Setup auth state listener
+export const initializeAuthListener = () => {
+  onAuthStateChanged(auth, (user) => {
+    if (user) {
+      storeUserSession(user);
+    } else {
+      clearUserSession();
+    }
+  });
+};
