@@ -1,14 +1,13 @@
 import type { Metadata } from "next";
-import { Manrope } from "next/font/google";
+import { Inter } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/toaster";
 import { AuthProvider } from "@/components/providers/AuthProvider";
 
-const manrope = Manrope({
+const inter = Inter({
   subsets: ['latin'],
   display: 'swap',
-  variable: '--font-manrope',
-  weight: ['200', '300', '400', '500', '600', '700', '800']
+  variable: '--font-inter',
 });
 
 export const metadata: Metadata = {
@@ -22,11 +21,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={manrope.className}>
+    <html lang="en" className={inter.variable}>
       <head>
         <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
       </head>
-      <body className="antialiased">
+      <body className={`${inter.className} min-h-screen bg-background`}>
         <AuthProvider>
           {children}
         </AuthProvider>

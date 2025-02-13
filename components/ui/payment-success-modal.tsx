@@ -5,18 +5,24 @@ import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import { CheckCircle } from "lucide-react";
 import { motion } from "framer-motion";
+import { Urbanist } from "next/font/google";
 
 interface PaymentSuccessModalProps {
   isOpen: boolean;
   orderId: string;
 }
 
+const urbanist = Urbanist({
+  subsets: ['latin'],
+  display: 'swap',
+});
+
 export function PaymentSuccessModal({ isOpen, orderId }: PaymentSuccessModalProps) {
   const router = useRouter();
 
   return (
     <Dialog open={isOpen}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className={`sm:max-w-md ${urbanist.className}`}>
         <div className="flex flex-col items-center space-y-4 py-6">
           <motion.div
             initial={{ scale: 0 }}

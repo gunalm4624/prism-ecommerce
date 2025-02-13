@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
+import { Plus, Eye } from "lucide-react";
 import { UpdateTrackingModal } from "@/components/admin/UpdateTrackingModal";
 import Image from "next/image";
 import {
@@ -15,11 +15,13 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { OrderDetailsModal } from "@/components/admin/OrderDetailsModal";
 
 export default function AdminOrdersPage() {
   const [orders, setOrders] = useState<any[]>([]);
   const [selectedOrder, setSelectedOrder] = useState<any>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
   const supabase = createClient();
 
   useEffect(() => {
@@ -40,6 +42,11 @@ export default function AdminOrdersPage() {
     setIsModalOpen(true);
   };
 
+  const handleViewDetails = (order: any) => {
+    setSelectedOrder(order);
+    setIsDetailsModalOpen(true);
+  };
+
   return (
     <div className="container mx-auto p-6">
       <h1 className="text-2xl font-bold mb-6">Admin Orders Dashboard</h1>
@@ -50,6 +57,7 @@ export default function AdminOrdersPage() {
               <TableHead>Order ID</TableHead>
               <TableHead>Product</TableHead>
               <TableHead>Customer Details</TableHead>
+              <TableHead>Amount</TableHead>
               <TableHead>Status</TableHead>
               <TableHead>Actions</TableHead>
             </TableRow>
@@ -85,6 +93,7 @@ export default function AdminOrdersPage() {
                     {order.shipping_address?.postal_code}
                   </p>
                 </TableCell>
+                <TableCell>₹{order.amount.toFixed(2)}</TableCell>
                 <TableCell>
                   <span className={`px-2 py-1 rounded-full text-sm ${
                     order.status === 'packing in progress' 
@@ -97,16 +106,26 @@ export default function AdminOrdersPage() {
                   </span>
                 </TableCell>
                 <TableCell>
-                  {!order.tracking_number && (
+                  <div className="flex gap-2">
                     <Button
                       size="sm"
                       variant="outline"
-                      onClick={() => handleUpdateTracking(order)}
+                      onClick={() => handleViewDetails(order)}
                     >
-                      <Plus className="h-4 w-4 mr-1" />
-                      Add Tracking
+                      <Eye className="h-4 w-4 mr-1" />
+                      View
                     </Button>
-                  )}
+                    {!order.tracking_number && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => handleUpdateTracking(order)}
+                      >
+                        <Plus className="h-4 w-4 mr-1" />
+                        Add Tracking
+                      </Button>
+                    )}
+                  </div>
                 </TableCell>
               </TableRow>
             ))}
@@ -119,6 +138,12 @@ export default function AdminOrdersPage() {
         onClose={() => setIsModalOpen(false)}
         order={selectedOrder}
         onUpdate={fetchOrders}
+      />
+
+      <OrderDetailsModal
+        isOpen={isDetailsModalOpen}
+        onClose={() => setIsDetailsModalOpen(false)}
+        order={selectedOrder}
       />
     </div>
   );

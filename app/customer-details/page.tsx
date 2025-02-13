@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -8,8 +8,9 @@ import Image from 'next/image';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { NavbarDashboard } from "@/components/blocks/shadcnblocks-com-navbar-dashboard";
 import { StackedCircularFooter } from "@/components/ui/stacked-circular-footer";
-import { Manrope } from "next/font/google";
+import { Urbanist } from "next/font/google";
 import { PaymentSuccessModal } from "@/components/ui/payment-success-modal";
+import { PaymentFailureModal } from "@/components/ui/payment-failure-modal";
 import { createClient } from '@/lib/supabase/client';
 import { auth } from '@/lib/firebaseClient';
 
@@ -33,7 +34,7 @@ interface ValidationErrors {
   pincode: string;
 }
 
-const manrope = Manrope({
+const urbanist = Urbanist({
   subsets: ['latin'],
   display: 'swap',
 });
@@ -63,12 +64,30 @@ export default function CustomerDetailsPage() {
 
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [successOrderId, setSuccessOrderId] = useState('');
+  const [userId, setUserId] = useState<string | null>(null);
+
+  // Add new state for failure modal
+  const [showFailureModal, setShowFailureModal] = useState(false);
+  const [paymentError, setPaymentError] = useState<{
+    code: string;
+    message: string;
+    solution?: string;
+  } | null>(null);
 
   // Get product details from URL params
   const productImage = searchParams?.get('image') || '';
   const productTitle = searchParams?.get('title') || '';
   const productDescription = searchParams?.get('description') || '';
   const productPrice = searchParams?.get('price') || '';
+
+  // Add useEffect to get current user
+  useEffect(() => {
+    const unsubscribe = auth.onAuthStateChanged((user) => {
+      setUserId(user?.uid || null);
+    });
+
+    return () => unsubscribe();
+  }, []);
 
   const validateField = useCallback((name: string, value: string) => {
     switch (name) {
@@ -119,6 +138,12 @@ export default function CustomerDetailsPage() {
   };
 
   const handleBuyNow = async () => {
+    // Check if user is logged in
+    if (!userId) {
+      alert('Please login to continue');
+      return;
+    }
+
     // Validate all fields
     const newErrors = {
       name: validateField('name', details.name),
@@ -168,13 +193,12 @@ export default function CustomerDetailsPage() {
         order_id: data.orderId,
         handler: async function (response: any) {
           try {
-            // Store order in Supabase
             const supabase = createClient();
             const { error: orderError } = await supabase
               .from('orders')
               .insert({
                 order_id: data.orderId,
-                user_id: auth.currentUser?.uid,
+                user_id: userId,
                 product_id: searchParams?.get('product_id'),
                 product_name: productTitle,
                 product_image: productImage,
@@ -183,20 +207,23 @@ export default function CustomerDetailsPage() {
                 status: 'packing in progress',
                 payment_id: response.razorpay_payment_id,
                 customer_name: details.name,
-                customer_email: auth.currentUser?.email,
+                customer_email: auth.currentUser?.email || '',
                 shipping_address: {
                   street: details.address,
                   city: details.city,
                   state: details.state,
                   postal_code: details.pincode,
-                  country: details.country
+                  country: details.country,
+                  mobile: details.mobile,
                 },
                 created_at: new Date().toISOString()
               });
 
-            if (orderError) throw orderError;
+            if (orderError) {
+              console.error('Supabase error:', orderError);
+              throw orderError;
+            }
 
-            // Show success modal
             setSuccessOrderId(data.orderId);
             setShowSuccessModal(true);
           } catch (error) {
@@ -211,6 +238,40 @@ export default function CustomerDetailsPage() {
         theme: {
           color: "#3399cc",
         },
+        modal: {
+          ondismiss: function() {
+            setPaymentError({
+              code: "PAYMENT_CANCELLED",
+              message: "Payment was cancelled",
+              solution: "Please try again or choose a different payment method"
+            });
+            setShowFailureModal(true);
+          }
+        },
+        notes: {
+          address: details.address
+        },
+        retry: {
+          enabled: false,
+          max_count: 0
+        },
+        payment: {
+          failed: function(resp: any) {
+            const errorMessages: { [key: string]: string } = {
+              BAD_REQUEST_ERROR: "Payment request was invalid",
+              PAYMENT_FAILED: "Payment failed at bank/UPI end",
+              GATEWAY_ERROR: "Unable to process payment",
+              SERVER_ERROR: "Internal server error",
+            };
+
+            setPaymentError({
+              code: resp.error.code,
+              message: errorMessages[resp.error.code] || resp.error.description,
+              solution: "Please check your payment details and try again"
+            });
+            setShowFailureModal(true);
+          }
+        }
       };
 
       const paymentObject = new (window as any).Razorpay(options);
@@ -222,7 +283,7 @@ export default function CustomerDetailsPage() {
   };
 
   return (
-    <div className={manrope.className}>
+    <div className={urbanist.className}>
       <div className="mx-auto p-4 md:p-8">
         <NavbarDashboard />
       </div>
@@ -366,6 +427,17 @@ export default function CustomerDetailsPage() {
       <PaymentSuccessModal 
         isOpen={showSuccessModal}
         orderId={successOrderId}
+      />
+      
+      <PaymentFailureModal
+        isOpen={showFailureModal}
+        onClose={() => setShowFailureModal(false)}
+        error={paymentError || {
+          code: "UNKNOWN_ERROR",
+          message: "An unknown error occurred",
+          solution: "Please try again later"
+        }}
+        onRetry={handleBuyNow}
       />
     </div>
   );
