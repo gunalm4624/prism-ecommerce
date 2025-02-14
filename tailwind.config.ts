@@ -57,8 +57,11 @@ export default {
   			sm: 'calc(var(--radius) - 4px)'
   		},
   		fontFamily: {
-  			sans: ['var(--font-manrope)'],
+  			sans: [
+  				'var(--font-manrope)'
+  			]
   		},
+  		
   	}
   },
   plugins: [require("tailwindcss-animate")],

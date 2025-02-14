@@ -23,8 +23,8 @@ module.exports = {
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
         primary: {
-          DEFAULT: "#7B891C",
-          hover: "#636F11",
+          DEFAULT: "#304d00",
+          hover: "#243a00",
           foreground: "hsl(var(--primary-foreground))",
         },
         secondary: {
@@ -53,7 +53,7 @@ module.exports = {
         },
       },
       fontFamily: {
-        sans: ['var(--font-inter)'],
+        sans: ['var(--font-general-sans)'],
       },
       borderRadius: {
         lg: "var(--radius)",
